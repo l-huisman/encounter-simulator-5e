@@ -1,6 +1,6 @@
 from action import Action
 import random
-
+import time
 
 class Creature:
     def __init__(self, name: str, actions: list[Action], hit_points: int, armour_class: int, initiative_modifier: int) -> None:
@@ -17,11 +17,6 @@ class Creature:
         if hit_roll >= target.armour_class:
             damage = action.roll_damage()
             target.take_damage(damage)
-            print(f"\n{self.name} rolls {hit_roll} and hits {target.name} for {damage} damage!")
-            if target.hit_points <= 0:
-                print(f"{self.name} kills {target.name}!")
-        else:
-            print(f"\n{self.name} rolls {hit_roll} and misses {target.name}!")
 
     def take_damage(self, damage: int) -> int:
         self.hit_points -= damage
