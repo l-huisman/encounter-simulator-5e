@@ -1,7 +1,7 @@
 from similator import Simulator
 
 # Create a simulator object
-simulator = Simulator(1000000)
+simulator = Simulator(100000)
 
 # Set the number of enemies
 enemy_count = int(input("How many enemies?: "))
