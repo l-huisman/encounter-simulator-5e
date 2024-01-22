@@ -2,6 +2,7 @@ from action import Action
 import random
 import time
 
+
 class Creature:
     def __init__(self, name: str, actions: list[Action], hit_points: int, armour_class: int, initiative_modifier: int) -> None:
         self.name = name
@@ -14,6 +15,9 @@ class Creature:
     def attack(self, target: "Creature") -> None:
         action = random.choice(self.actions)
         hit_roll = action.roll_to_hit()
+        if hit_roll == 20:
+            damage = action.roll_critical_damage() * 2
+            target.take_damage(damage)
         if hit_roll >= target.armour_class:
             damage = action.roll_damage()
             target.take_damage(damage)
