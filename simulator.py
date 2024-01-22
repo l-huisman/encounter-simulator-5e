@@ -6,11 +6,12 @@ import random
 
 
 class Simulator:
-    def __init__(self, total_simulations):
+    def __init__(self, total_simulations, adventurers_highest_damage):
         self.simulation_count = 0
         self.simulation_results = []
         self.initiative_dice = Dice(1, 20)
         self.total_simulations = total_simulations
+        self.adventurers_highest_damage = adventurers_highest_damage
 
     def run(self, enemy_count):
         # Run the simulation until the simulation count

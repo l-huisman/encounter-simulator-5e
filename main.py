@@ -1,4 +1,4 @@
-from similator import Simulator
+from simulator import Simulator
 
 import argparse
 
@@ -12,16 +12,16 @@ parser.add_argument("--enemy_count", type=int, help="The number of enemies in th
 parser.add_argument("--simulation_count", type=int, help="The number of simulations to run. Default is 100000.")
 
 # Add an argument for the highest damage adventurers
-parser.add_argument("--ad_highest_damage", action="store_true", help="If set, the adventuring party will only use their highest damage option. Default is False.")
+parser.add_argument("--adventurers_highest_damage", action="store_true", help="If set, the adventuring party will only use their highest damage option. Default is False.")
 
 # Add an argument for the highest damage enemies
-parser.add_argument("--enemy_highest_damage", action="store_true", help="If set, the enemies will only use their highest damage option. Default is False.")
+parser.add_argument("--enemies_highest_damage", action="store_true", help="If set, the enemies will only use their highest damage option. Default is False.")
 
 # Parse the arguments
 args = parser.parse_args()
 
 # Create a simulator object
-simulator = Simulator(args.simulation_count, args.ad_highest_damage)
+simulator = Simulator(args.simulation_count, args.adventurers_highest_damage)
 
 # Set the number of enemies
 enemy_count = args.enemy_count
