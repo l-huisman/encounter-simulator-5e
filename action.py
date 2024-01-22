@@ -16,4 +16,4 @@ class Action:
         return self.damage_dice.roll() + self.damage_modifier
 
     def roll_critical_damage(self):
-        return self.damage_dice.roll() * 2 + self.damage_modifier
+        return self.damage_dice.roll() + self.damage_dice.roll() + self.damage_modifier
