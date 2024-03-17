@@ -1,4 +1,4 @@
-from action import Action
+from models.action import Action
 import random
 
 

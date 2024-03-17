@@ -1,4 +1,4 @@
-from dice import Dice
+from models.dice import Dice
 
 
 class Action:

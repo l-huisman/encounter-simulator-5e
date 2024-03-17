@@ -1,6 +1,6 @@
-from dice import Dice
-from action import Action
-from creature import Creature
+from models.dice import Dice
+from models.action import Action
+from models.creature import Creature
 from results import SimulationResults
 
 import random
