@@ -1,5 +1,3 @@
-import random
-
 from models.action import Action
 from models.creature import Creature
 from models.dice import Dice
@@ -7,12 +5,13 @@ from results import SimulationResults
 
 
 class Simulator:
-    def __init__(self, total_simulations, adventurers_highest_damage):
-        self.simulation_count = 0
-        self.initiative_dice = Dice(1, 20)
-        self.total_simulations = total_simulations
-        self.adventurers_highest_damage = adventurers_highest_damage
-        self.simulation_results = SimulationResults()
+    def __init__(self, total_simulations: int, adventurers_highest_damage: bool):
+        self.round: int = 0
+        self.simulation_count: int = 0
+        self.initiative_dice: Dice = Dice(1, 20)
+        self.total_simulations: int = total_simulations
+        self.adventurers_highest_damage: float = adventurers_highest_damage
+        self.simulation_results: SimulationResults = SimulationResults()
         self.party: list[Creature] = []
 
     def run(self, enemy_count):
@@ -45,43 +44,65 @@ class Simulator:
             # Set the round to 0
             self.round = 1
 
-            # Encounter loop
-            while True:
-                # Iterate through the initiative order
-                for creature in initiative_order:
-                    # If the creature is dead, skip their turn
-                    if not creature.is_alive():
-                        continue
-
-                    # If the creature is an enemy, attack a random adventurer
-                    if creature in enemies:
-                        target: Creature = random.choice(self.party)
-                        creature.attack(target)
-                    else:  # If the creature is an adventurer, attack a random enemy
-                        target: Creature = random.choice(enemies)
-                        creature.attack(target)
-
-                    # If all the enemies or all the adventurers are dead, end the combat
-                    if not any(enemy.is_alive() for enemy in enemies) or not any(
-                            adventurer.is_alive() for adventurer in self.party):
-                        break
-
-                # Increment the round
-                self.round += 1
-
-                # If all the enemies are dead, end the combat
-                if not any(enemy.is_alive() for enemy in enemies) or not any(
-                        adventurer.is_alive() for adventurer in self.party):
-                    self.save_simulation_results(enemies)
-                    break
+            # Simulate the combat round
+            self.simulate_combat_rounds(enemies, initiative_order)
 
         # Print the results
         self.print_results()
 
+    def simulate_combat_rounds(self, enemies, initiative_order: list[Creature]) -> None:
+        # Encounter loop
+        while True:
+            # Iterate through the initiative order
+            for creature in initiative_order:
+                # If the creature is dead, skip their turn
+                if not creature.is_alive():
+                    creature.roll_death_saving_throw()
+                    continue
+
+                # If the creature is an enemy, attack a random adventurer
+                target = creature.choose_target(enemies, self.party)
+                creature.attack(target)
+
+                # Check if all enemies or all adventurers are dead
+                if self.all_enemies_dead(enemies) or self.all_adventurers_dead():
+                    break
+
+            # Increment the round
+            self.round += 1
+
+            # If all the enemies are dead, end the combat
+            if not any(enemy.is_alive() for enemy in enemies) or not any(
+                    adventurer.is_alive() for adventurer in self.party):
+                self.save_simulation_results(enemies)
+                break
+
+    def all_enemies_dead(self, enemies):
+        return not any(enemy.is_alive() for enemy in enemies)
+
+    def all_adventurers_dead(self):
+        return not any(adventurer.is_alive() for adventurer in self.party)
+
+    def set_initiative_order(self, enemies) -> list[Creature]:
+        # Roll initiative for the party
+        for adventurer in self.party:
+            adventurer.initiative = self.initiative_dice.roll() + adventurer.initiative_modifier
+
+        # Roll initiative for the enemies
+        for enemy in enemies:
+            enemy.initiative = self.initiative_dice.roll() + enemy.initiative_modifier
+
+        # Sort the party and enemies by initiative
+        initiative_order: list[Creature] = self.party + enemies
+        initiative_order.sort(key=lambda x: x.initiative, reverse=True)
+
+        # Return the initiative order
+        return initiative_order
+
     def save_simulation_results(self, enemies: list[Creature]):
         self.simulation_count += 1
         self.simulation_results.total_simulations += 1
-        if any(enemy.is_alive() for enemy in enemies):
+        if self.all_enemies_dead(enemies):
             self.simulation_results.remaining_hit_points_enemies.append(
                 sum(enemy.hit_points for enemy in enemies if enemy.is_alive()))
             self.simulation_results.surviving_enemies.append(len([enemy for enemy in enemies if enemy.is_alive()]))
@@ -92,22 +113,6 @@ class Simulator:
             self.simulation_results.surviving_adventurers.append(
                 len([adventurer for adventurer in self.party if adventurer.is_alive()]))
             self.simulation_results.encounters_won += 1
-
-    def set_initiative_order(self, enemies):
-        # Roll initiative for the party
-        for adventurer in self.party:
-            adventurer.initiative = self.initiative_dice.roll() + adventurer.initiative_modifier
-
-        # Roll initiative for the enemies
-        for enemy in enemies:
-            enemy.initiative = self.initiative_dice.roll() + enemy.initiative_modifier
-
-        # Sort the party and enemies by initative
-        initiative_order: list[Creature] = self.party + enemies
-        initiative_order.sort(key=lambda x: x.initiative, reverse=True)
-
-        # Return the initiative order
-        return initiative_order
 
     def print_results(self):
         # Iterate through the results and print the percentage won
