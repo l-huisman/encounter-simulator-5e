@@ -7,7 +7,8 @@ from simulator import Simulator
 parser = argparse.ArgumentParser(description="Simulate a D&D combat encounter.")
 
 # Add an argument for the number of enemies
-parser.add_argument("--enemy_count", type=int, default=4, help="The number of enemies in the encounter. Default is 4.")
+parser.add_argument("--enemy_count", type=int, default=4,
+                    help="The number of enemies in the encounter. Default is 4.")
 
 # Add an argument for the number of simulations
 parser.add_argument("--simulation_count", type=int, default=100000,
