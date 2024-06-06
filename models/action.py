@@ -9,11 +9,11 @@ class Action:
         self.damage_modifier: int = ability_modifier
         self.hit_modifier: int = proficiency_modifier + ability_modifier
 
-    def roll_to_hit(self):
+    def roll_to_hit(self) -> int:
         return self.hit_dice.roll() + self.hit_modifier
 
-    def roll_damage(self):
+    def roll_damage(self) -> int:
         return self.damage_dice.roll() + self.damage_modifier
 
-    def roll_critical_damage(self):
+    def roll_critical_damage(self) -> int:
         return self.damage_dice.roll() + self.damage_dice.roll() + self.damage_modifier

@@ -1,6 +1,7 @@
-from simulator import Simulator
 import argparse
 import sys
+
+from simulator import Simulator
 
 # Create an argument parser
 parser = argparse.ArgumentParser(description="Simulate a D&D combat encounter.")
@@ -9,13 +10,16 @@ parser = argparse.ArgumentParser(description="Simulate a D&D combat encounter.")
 parser.add_argument("--enemy_count", type=int, default=4, help="The number of enemies in the encounter. Default is 4.")
 
 # Add an argument for the number of simulations
-parser.add_argument("--simulation_count", type=int, default=100000, help="The number of simulations to run. Default is 100000.")
+parser.add_argument("--simulation_count", type=int, default=100000,
+                    help="The number of simulations to run. Default is 100000.")
 
 # Add an argument for the highest damage adventurers
-parser.add_argument("--adventurers_highest_damage", action="store_true", help="If set, the adventuring party will only use their highest damage option. Default is False.")
+parser.add_argument("--adventurers_highest_damage", action="store_true",
+                    help="If set, the adventuring party will only use their highest damage option. Default is False.")
 
 # Add an argument for the highest damage enemies
-parser.add_argument("--enemies_highest_damage", action="store_true", help="If set, the enemies will only use their highest damage option. Default is False.")
+parser.add_argument("--enemies_highest_damage", action="store_true",
+                    help="If set, the enemies will only use their highest damage option. Default is False.")
 
 # Parse the arguments
 args = parser.parse_args()

@@ -1,9 +1,9 @@
-from models.dice import Dice
+import random
+
 from models.action import Action
 from models.creature import Creature
+from models.dice import Dice
 from results import SimulationResults
-
-import random
 
 
 class Simulator:
@@ -20,13 +20,18 @@ class Simulator:
             # Create the list of enemies
             enemies: list[Creature] = []
             for i in range(enemy_count):
-                enemies.append(Creature("Goblin", [Action("Scimitar", 2, 2, Dice(1, 6)), Action("Longbow", 2, 2, Dice(1, 8))], 7, 15, 2))
+                enemies.append(
+                    Creature("Goblin", [Action("Scimitar", 2, 2, Dice(1, 6)), Action("Longbow", 2, 2, Dice(1, 8))], 7,
+                             15, 2))
 
             # Create an adventuring party
             party: list[Creature] = [
-                Creature("Fighter", [Action("Longsword", 2, 3, Dice(1, 8)), Action("Shortbow", 2, 2, Dice(1, 6))], 13, 18, 2),
-                Creature("Rogue", [Action("Shortsword", 2, 3, Dice(1, 6)), Action("Shortbow", 2, 3, Dice(1, 6))], 11, 15, 3),
-                Creature("Wizard", [Action("Firebolt", 2, 3, Dice(1, 10)), Action("Chill Touch", 2, 3, Dice(1, 8))], 9, 12, 1),
+                Creature("Fighter", [Action("Longsword", 2, 3, Dice(1, 8)), Action("Shortbow", 2, 2, Dice(1, 6))], 13,
+                         18, 2),
+                Creature("Rogue", [Action("Shortsword", 2, 3, Dice(1, 6)), Action("Shortbow", 2, 3, Dice(1, 6))], 11,
+                         15, 3),
+                Creature("Wizard", [Action("Firebolt", 2, 3, Dice(1, 10)), Action("Chill Touch", 2, 3, Dice(1, 8))], 9,
+                         12, 1),
                 Creature("Cleric", [Action("Mace", 2, 1, Dice(1, 6)), Action("Longbow", 2, 0, Dice(1, 8))], 10, 16, 0),
             ]
 
@@ -56,14 +61,16 @@ class Simulator:
                         creature.attack(target)
 
                     # If all the enemies or all the adventurers are dead, end the combat
-                    if not any(enemy.is_alive() for enemy in enemies) or not any(adventurer.is_alive() for adventurer in party):
+                    if not any(enemy.is_alive() for enemy in enemies) or not any(
+                            adventurer.is_alive() for adventurer in party):
                         break
 
                 # Increment the round
                 self.round += 1
 
                 # If all the enemies are dead, end the combat
-                if not any(enemy.is_alive() for enemy in enemies) or not any(adventurer.is_alive() for adventurer in party):
+                if not any(enemy.is_alive() for enemy in enemies) or not any(
+                        adventurer.is_alive() for adventurer in party):
                     self.save_simulation_results(enemies, party)
                     break
 
@@ -74,20 +81,23 @@ class Simulator:
         self.simulation_count += 1
         self.simulation_results.total_simulations += 1
         if any(enemy.is_alive() for enemy in enemies):
-            self.simulation_results.remaining_hit_points_enemies.append(sum(enemy.hit_points for enemy in enemies if enemy.is_alive()))
+            self.simulation_results.remaining_hit_points_enemies.append(
+                sum(enemy.hit_points for enemy in enemies if enemy.is_alive()))
             self.simulation_results.surviving_enemies.append(len([enemy for enemy in enemies if enemy.is_alive()]))
             self.simulation_results.encounters_lost += 1
         else:
-            self.simulation_results.remaining_hit_points_adventurers.append(sum(adventurer.hit_points for adventurer in party if adventurer.is_alive()))
-            self.simulation_results.surviving_adventurers.append(len([adventurer for adventurer in party if adventurer.is_alive()]))
+            self.simulation_results.remaining_hit_points_adventurers.append(
+                sum(adventurer.hit_points for adventurer in party if adventurer.is_alive()))
+            self.simulation_results.surviving_adventurers.append(
+                len([adventurer for adventurer in party if adventurer.is_alive()]))
             self.simulation_results.encounters_won += 1
 
     def set_initiative_order(self, party, enemies):
-        # Roll initative for the party
+        # Roll initiative for the party
         for adventurer in party:
             adventurer.initiative = self.initiative_dice.roll() + adventurer.initiative_modifier
 
-        # Roll initative for the enemies
+        # Roll initiative for the enemies
         for enemy in enemies:
             enemy.initiative = self.initiative_dice.roll() + enemy.initiative_modifier
 
@@ -102,9 +112,15 @@ class Simulator:
         # Iterate through the results and print the percentage won
         # The average amount of party members that survived the encounter
         print(f"\nResults:")
-        print(f"Percentage of Encounters Won: {self.simulation_results.encounters_won / self.simulation_results.total_simulations * 100}%")
-        print(f"Percentage of Encounters Lost: {self.simulation_results.encounters_lost / self.simulation_results.total_simulations * 100}%")
-        print(f"Average Number of Party Members Surviving: {sum(self.simulation_results.surviving_adventurers) / self.simulation_results.total_simulations}")
-        print(f"Average Number of Enemies Surviving: {sum(self.simulation_results.surviving_enemies) / self.simulation_results.total_simulations}")
-        print(f"Average Remaining Hit Points Enemies: {sum(self.simulation_results.remaining_hit_points_enemies) / self.simulation_results.total_simulations}")
-        print(f"Average Remaining Hit Points Adventurers: {sum(self.simulation_results.remaining_hit_points_adventurers) / self.simulation_results.total_simulations} ")
+        print(
+            f"Percentage of Encounters Won: {self.simulation_results.encounters_won / self.simulation_results.total_simulations * 100}%")
+        print(
+            f"Percentage of Encounters Lost: {self.simulation_results.encounters_lost / self.simulation_results.total_simulations * 100}%")
+        print(
+            f"Average Number of Party Members Surviving: {sum(self.simulation_results.surviving_adventurers) / self.simulation_results.total_simulations}")
+        print(
+            f"Average Number of Enemies Surviving: {sum(self.simulation_results.surviving_enemies) / self.simulation_results.total_simulations}")
+        print(
+            f"Average Remaining Hit Points Enemies: {sum(self.simulation_results.remaining_hit_points_enemies) / self.simulation_results.total_simulations}")
+        print(
+            f"Average Remaining Hit Points Adventurers: {sum(self.simulation_results.remaining_hit_points_adventurers) / self.simulation_results.total_simulations} ")

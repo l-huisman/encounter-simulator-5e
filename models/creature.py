@@ -1,9 +1,11 @@
-from models.action import Action
 import random
+
+from models.action import Action
 
 
 class Creature:
-    def __init__(self, name: str, actions: list[Action], hit_points: int, armour_class: int, initiative_modifier: int) -> None:
+    def __init__(self, name: str, actions: list[Action], hit_points: int, armour_class: int,
+                 initiative_modifier: int) -> None:
         self.name = name
         self.initiative = 0
         self.actions = actions
@@ -21,7 +23,7 @@ class Creature:
             damage = action.roll_damage()
             target.take_damage(damage)
 
-    def take_damage(self, damage: int) -> int:
+    def take_damage(self, damage: int) -> None:
         self.hit_points -= damage
 
     def is_alive(self) -> bool:
