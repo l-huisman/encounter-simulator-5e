@@ -16,23 +16,28 @@ class Creature:
         self.target: Creature = None
         self.death_saves: int = 0
         self.death_fails: int = 0
-        self.status_conditions: list[str] = []
+        self.unconscious: bool = False
 
-    def attack(self, target: "Creature") -> None:
+    def attack(self) -> None:
         action = random.choice(self.actions)
         hit_roll = action.roll_to_hit()
         if hit_roll == 20:
             damage = action.roll_critical_damage()
-            target.take_damage(damage)
-        if hit_roll >= target.armour_class:
+            self.target.take_damage(damage)
+        if hit_roll >= self.target.armour_class:
             damage = action.roll_damage()
-            target.take_damage(damage)
+            self.target.take_damage(damage)
 
     def choose_target(self, enemies: list["Creature"], party: list["Creature"]) -> "Creature":
+        if self.target and random.random() < 0.75:  # 75% chance to keep the same target
+            return self.target
+
         if self in enemies:
-            return random.choice(party)
+            self.target = random.choice(party)
         else:
-            return random.choice(enemies)
+            self.target = random.choice(enemies)
+
+        return self.target
 
     def roll_death_saving_throw(self) -> None:
         roll = Dice(1, 20).roll()
@@ -57,3 +62,6 @@ class Creature:
 
     def get_initiative(self) -> int:
         return self.initiative
+
+    def is_unconscious(self) -> bool:
+        return self.unconscious

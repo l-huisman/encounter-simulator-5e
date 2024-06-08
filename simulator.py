@@ -58,8 +58,9 @@ class Simulator:
                     continue
 
                 # If the creature is an enemy, attack a random adventurer
-                target = creature.choose_target(self.enemies, self.party)
-                creature.attack(target)
+                if not creature.is_unconscious():
+                    creature.choose_target(enemies, self.party)
+                    creature.attack()
 
                 # Check if all enemies or all adventurers are dead
                 if self.all_enemies_dead(self.enemies) or self.all_adventurers_dead():
