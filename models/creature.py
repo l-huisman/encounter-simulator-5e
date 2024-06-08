@@ -16,6 +16,7 @@ class Creature:
         self.target: Creature = None
         self.death_saves: int = 0
         self.death_fails: int = 0
+        self.unconscious: bool = False
 
     def attack(self) -> None:
         action = random.choice(self.actions)
@@ -61,3 +62,6 @@ class Creature:
 
     def get_initiative(self) -> int:
         return self.initiative
+
+    def is_unconscious(self) -> bool:
+        return self.unconscious
