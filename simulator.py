@@ -13,16 +13,13 @@ class Simulator:
         self.adventurers_highest_damage: float = adventurers_highest_damage
         self.simulation_results: SimulationResults = SimulationResults()
         self.party: list[Creature] = []
+        self.enemies: list[Creature] = []
 
     def run(self, enemy_count):
         # Run the simulation until the simulation count
         while self.simulation_count < self.total_simulations:
             # Create the list of enemies
-            enemies: list[Creature] = []
-            for i in range(enemy_count):
-                enemies.append(
-                    Creature("Goblin", [Action("Scimitar", 2, 2, Dice(1, 6)), Action("Longbow", 2, 2, Dice(1, 8))], 7,
-                             15, 2))
+            self.enemies: list[Creature] = [Creature("Goblin", [Action("Scimitar", 2, 2, Dice(1, 6)), Action("Longbow", 2, 2, Dice(1, 8))], 7, 15, 2) for i in range(enemy_count)]
 
             # Create an adventuring party
             self.party: list[Creature] = [
@@ -39,18 +36,18 @@ class Simulator:
                 print(f"Simulation {self.simulation_count} of {self.total_simulations}", end="\r", flush=True)
 
             # Set initiative order
-            initiative_order = self.set_initiative_order(enemies)
+            initiative_order = self.set_initiative_order()
 
             # Set the round to 0
             self.round = 1
 
             # Simulate the combat round
-            self.simulate_combat_rounds(enemies, initiative_order)
+            self.simulate_combat_rounds(initiative_order)
 
         # Print the results
         self.print_results()
 
-    def simulate_combat_rounds(self, enemies, initiative_order: list[Creature]) -> None:
+    def simulate_combat_rounds(self, initiative_order: list[Creature]) -> None:
         # Encounter loop
         while True:
             # Iterate through the initiative order
@@ -61,20 +58,20 @@ class Simulator:
                     continue
 
                 # If the creature is an enemy, attack a random adventurer
-                target = creature.choose_target(enemies, self.party)
+                target = creature.choose_target(self.enemies, self.party)
                 creature.attack(target)
 
                 # Check if all enemies or all adventurers are dead
-                if self.all_enemies_dead(enemies) or self.all_adventurers_dead():
+                if self.all_enemies_dead(self.enemies) or self.all_adventurers_dead():
                     break
 
             # Increment the round
             self.round += 1
 
             # If all the enemies are dead, end the combat
-            if not any(enemy.is_alive() for enemy in enemies) or not any(
+            if not any(enemy.is_alive() for enemy in self.enemies) or not any(
                     adventurer.is_alive() for adventurer in self.party):
-                self.save_simulation_results(enemies)
+                self.save_simulation_results()
                 break
 
     def all_enemies_dead(self, enemies):
@@ -83,29 +80,29 @@ class Simulator:
     def all_adventurers_dead(self):
         return not any(adventurer.is_alive() for adventurer in self.party)
 
-    def set_initiative_order(self, enemies) -> list[Creature]:
+    def set_initiative_order(self) -> list[Creature]:
         # Roll initiative for the party
         for adventurer in self.party:
             adventurer.initiative = self.initiative_dice.roll() + adventurer.initiative_modifier
 
         # Roll initiative for the enemies
-        for enemy in enemies:
+        for enemy in self.enemies:
             enemy.initiative = self.initiative_dice.roll() + enemy.initiative_modifier
 
         # Sort the party and enemies by initiative
-        initiative_order: list[Creature] = self.party + enemies
+        initiative_order: list[Creature] = self.party + self.enemies
         initiative_order.sort(key=lambda x: x.initiative, reverse=True)
 
         # Return the initiative order
         return initiative_order
 
-    def save_simulation_results(self, enemies: list[Creature]):
+    def save_simulation_results(self):
         self.simulation_count += 1
         self.simulation_results.total_simulations += 1
-        if self.all_enemies_dead(enemies):
+        if self.all_enemies_dead(self.enemies):
             self.simulation_results.remaining_hit_points_enemies.append(
-                sum(enemy.hit_points for enemy in enemies if enemy.is_alive()))
-            self.simulation_results.surviving_enemies.append(len([enemy for enemy in enemies if enemy.is_alive()]))
+                sum(enemy.hit_points for enemy in self.enemies if enemy.is_alive()))
+            self.simulation_results.surviving_enemies.append(len([enemy for enemy in self.enemies if enemy.is_alive()]))
             self.simulation_results.encounters_lost += 1
         else:
             self.simulation_results.remaining_hit_points_adventurers.append(

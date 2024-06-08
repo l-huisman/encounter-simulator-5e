@@ -16,6 +16,7 @@ class Creature:
         self.target: Creature = None
         self.death_saves: int = 0
         self.death_fails: int = 0
+        self.status_conditions: list[str] = []
 
     def attack(self, target: "Creature") -> None:
         action = random.choice(self.actions)
