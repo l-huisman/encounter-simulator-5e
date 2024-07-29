@@ -1,6 +1,6 @@
 import random
 
-from models.Abilities import Ability, Abilities
+from models.abilities import Ability, Abilities
 from models.action import Action
 from models.dice import Dice
 
