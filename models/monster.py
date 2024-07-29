@@ -1,6 +1,7 @@
+import random
 from enum import Enum
-from models.Abilities import Ability
-from models.dice import Dice
+from Abilities import Ability
+from dice import Dice
 
 
 def calculate_ability_modifier(ability: int) -> int:
@@ -55,16 +56,13 @@ class ChallengeRating(Enum):
         self._experience_points = experience_points
         self._proficiency_bonus = proficiency_bonus
 
-    @property
-    def get_challenge_rating(self):
+    def get_challenge_rating(self) -> float:
         return self._challenge_rating
 
-    @property
-    def get_experience_points(self):
+    def get_experience_points(self) -> int:
         return self._experience_points
 
-    @property
-    def get_proficiency_bonus(self):
+    def get_proficiency_bonus(self) -> int:
         return self._proficiency_bonus
 
 
@@ -136,7 +134,7 @@ class Monster:
         self.senses: dict = senses
         self.languages: list = languages
 
-        self.challenge_rating: ChallengeRating = challenge_rating.get_challenge_rating()
+        self.challenge_rating: ChallengeRating = challenge_rating
         self.experience_points: int = challenge_rating.get_experience_points()
         self.proficiency_bonus: int = challenge_rating.get_proficiency_bonus()
 
@@ -151,16 +149,57 @@ class Monster:
         self.bonus_actions: list = bonus_actions
         self.legendary_actions: list = legendary_actions
         self.reactions: list = reactions
+        self.target = None
 
         self.dead: bool = False
         self.unconscious: bool = False
         self.death_saving_throw_successes: int = 0
         self.death_saving_throw_failures: int = 0
 
+    def reset(self) -> None:
+        self.hit_points = self.calculate_hit_points()
+        self.target = None
+        self.dead = False
+        self.unconscious = False
+        self.death_saving_throw_successes = 0
+        self.death_saving_throw_failures = 0
+
+    def choose_target(self, enemies: list["Monster"], party: list["Monster"]) -> "Monster":
+        if self.target and random.random() < 0.75:
+            return self.target
+
+        if self in enemies:
+            self.target = random.choice(party)
+        else:
+            self.target = random.choice(enemies)
+
+    def is_alive(self) -> bool:
+        return self.hit_points > 0 and self.death_saving_throw_failures < 3
+
+    def roll_death_saving_throw(self) -> None:
+        roll = Dice(1, 20).roll()
+
+        if roll == 20:
+            self.hit_points = 1
+        elif roll == 1:
+            self.death_saving_throw_failures += 2
+        elif roll <= 9:
+            self.death_saving_throw_failures += 1
+        else:
+            self.death_saving_throw_successes += 1
+
     def calculate_hit_points(self, average: bool = True) -> int:
         base_hp = self.hit_dice.average_roll() if average else self.hit_dice.roll()
         additional_hp = self.constitution_modifier * self.hit_dice.amount
         return base_hp + additional_hp
+
+    def attack(self) -> None:
+        if self.target and not self.target == self:
+            for action in self.actions:
+                if action.roll_to_hit() >= self.target.armour_class:
+                    damage = action.roll_damage()
+                    self.target.take_damage(damage)
+                    action.apply_effects(self.target)
 
     def roll_saving_throw(self, dc: int, ability: Ability) -> bool:
         roll = Dice(1, 20).roll()
@@ -191,6 +230,7 @@ class Monster:
         else:
             self.hit_points -= damage
         if self.hit_points <= 0:
+            self.hit_points = 0
             self.unconscious = True
 
     def apply_condition(self, status_effect: str, duration: int, repeat_save: bool, disadvantage_on_save: bool):
@@ -276,3 +316,128 @@ class Effect:
         else:
             if self.half_damage_on_save and self.additional_damage_dice:
                 target.take_damage(self.additional_damage_dice.roll() // 2)
+
+
+monster_1 = Monster(
+    name="Goblin",
+    size="Small",
+    race="Goblinoid",
+    sub_race="",
+    alignment="Neutral Evil",
+    strength=8,
+    dexterity=14,
+    constitution=10,
+    intelligence=10,
+    wisdom=8,
+    charisma=8,
+    hit_dice=Dice(2, 6),
+    armour_class=15,
+    speed=30,
+    skills={},
+    senses={"darkvision": 60},
+    languages=["Common", "Goblin"],
+    challenge_rating=ChallengeRating.CR_1_4,
+    damage_vulnerabilities=[],
+    damage_resistances=[],
+    damage_immunities=[],
+    condition_immunities=[],
+    special_abilities=[],
+    actions=[Action("Scimitar", 2, 0, Dice(1, 6))],
+    bonus_actions=[],
+    legendary_actions=[],
+    reactions=[]
+)
+
+monster_2 = Monster(
+    name="Zombie",
+    size="Medium",
+    race="Undead",
+    sub_race="",
+    alignment="Neutral Evil",
+    strength=13,
+    dexterity=6,
+    constitution=16,
+    intelligence=3,
+    wisdom=6,
+    charisma=5,
+    hit_dice=Dice(3, 8),
+    armour_class=8,
+    speed=20,
+    skills={},
+    senses={"darkvision": 60},
+    languages=["Common"],
+    challenge_rating=ChallengeRating.CR_1_4,
+    damage_vulnerabilities=["bludgeoning"],
+    damage_resistances=["piercing", "slashing"],
+    damage_immunities=["poison"],
+    condition_immunities=["poisoned"],
+    special_abilities=[],
+    actions=[Action("Slam", 2, 1, Dice(1, 6))],
+    bonus_actions=[],
+    legendary_actions=[],
+    reactions=[]
+)
+
+initiative_order = []
+initiative_dice = Dice(1, 20)
+
+simulations = 1000
+current_simulation = 0
+
+goblin_results = {"encounters_won": 0, "encounters_lost": 0, "remaining_hit_points": 0, "initiative": 0}
+Zombie_results = {"encounters_won": 0, "encounters_lost": 0, "remaining_hit_points": 0, "initiative": 0}
+
+while current_simulation < simulations:
+    monster_1 = monster_1
+    monster_2 = monster_2
+
+    monster_1.reset()
+    monster_2.reset()
+
+    monster_1.initiative = initiative_dice.roll() + monster_1.dexterity_modifier
+    monster_2.initiative = initiative_dice.roll() + monster_2.dexterity_modifier
+
+    initiative_order = [monster_1, monster_2]
+    initiative_order.sort(key=lambda x: x.initiative, reverse=True)
+
+    round = 1
+
+    while True:
+        for creature in initiative_order:
+            if not creature.is_alive():
+                creature.roll_death_saving_throw()
+                continue
+
+            creature.choose_target([monster_2], [monster_1])
+            creature.attack()
+
+            if not monster_2.is_alive() or not monster_1.is_alive():
+                break
+
+        round += 1
+
+        if not monster_2.is_alive() or not monster_1.is_alive():
+            break
+
+    current_simulation += 1
+
+    if monster_1.is_alive():
+        goblin_results["encounters_won"] += 1
+        Zombie_results["encounters_lost"] += 1
+
+    if monster_2.is_alive():
+        Zombie_results["encounters_won"] += 1
+        goblin_results["encounters_lost"] += 1
+
+    goblin_results["remaining_hit_points"] += monster_1.hit_points
+    Zombie_results["remaining_hit_points"] += monster_2.hit_points
+    goblin_results["initiative"] += monster_1.initiative
+    Zombie_results["initiative"] += monster_2.initiative
+
+print(f"\nResults: Goblin vs Zombie")
+print(f"Percentage of Encounters Won: {goblin_results['encounters_won'] / simulations * 100}%")
+print(f"Percentage of Encounters Lost: {Zombie_results['encounters_won'] / simulations * 100}%")
+print(f"Average Remaining Hit Points Goblin: {goblin_results['remaining_hit_points'] / simulations}")
+print(f"Average Remaining Hit Points Zombie: {Zombie_results['remaining_hit_points'] / simulations}")
+print(f"Average Initiative Goblin: {goblin_results['initiative'] / simulations}")
+print(f"Average Initiative Zombie: {Zombie_results['initiative'] / simulations}")
