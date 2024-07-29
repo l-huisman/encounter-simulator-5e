@@ -37,4 +37,4 @@ simulator = Simulator(args.simulation_count, args.adventurers_highest_damage)
 enemy_count = args.enemy_count
 
 # Run the simulator
-simulator.run(enemy_count)
+simulator.monster_vs_monster()

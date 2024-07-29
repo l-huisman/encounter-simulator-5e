@@ -19,7 +19,9 @@ class Simulator:
         # Run the simulation until the simulation count
         while self.simulation_count < self.total_simulations:
             # Create the list of enemies
-            self.enemies: list[Creature] = [Creature("Goblin", [Action("Scimitar", 2, 2, Dice(1, 6)), Action("Longbow", 2, 2, Dice(1, 8))], 7, 15, 2) for i in range(enemy_count)]
+            self.enemies: list[Creature] = [
+                Creature("Goblin", [Action("Scimitar", 2, 2, Dice(1, 6)), Action("Longbow", 2, 2, Dice(1, 8))], 7, 15,
+                         2) for i in range(enemy_count)]
 
             # Create an adventuring party
             self.party: list[Creature] = [
@@ -63,7 +65,7 @@ class Simulator:
                     creature.attack()
 
                 # Check if all enemies or all adventurers are dead
-                if self.all_enemies_dead(self.enemies) or self.all_adventurers_dead():
+                if self.all_enemies_dead() or self.all_adventurers_dead():
                     break
 
             # Increment the round
@@ -75,8 +77,8 @@ class Simulator:
                 self.save_simulation_results()
                 break
 
-    def all_enemies_dead(self, enemies):
-        return not any(enemy.is_alive() for enemy in enemies)
+    def all_enemies_dead(self):
+        return not any(enemy.is_alive() for enemy in self.enemies)
 
     def all_adventurers_dead(self):
         return not any(adventurer.is_alive() for adventurer in self.party)
@@ -100,7 +102,7 @@ class Simulator:
     def save_simulation_results(self):
         self.simulation_count += 1
         self.simulation_results.total_simulations += 1
-        if self.all_enemies_dead(self.enemies):
+        if self.all_enemies_dead():
             self.simulation_results.remaining_hit_points_enemies.append(
                 sum(enemy.hit_points for enemy in self.enemies if enemy.is_alive()))
             self.simulation_results.surviving_enemies.append(len([enemy for enemy in self.enemies if enemy.is_alive()]))
@@ -128,3 +130,51 @@ class Simulator:
               f"{sum(self.simulation_results.remaining_hit_points_enemies) / self.simulation_results.total_simulations}")
         print(f"Average Remaining Hit Points Adventurers: "
               f"{sum(self.simulation_results.remaining_hit_points_adventurers) / self.simulation_results.total_simulations} ")
+
+    @staticmethod
+    def monster_vs_monster():
+        current_simulation = 0
+        number_of_simulations = 100000
+
+        goblin_results = SimulationResults()
+        orc_results = SimulationResults()
+
+        while current_simulation < number_of_simulations:
+            monster_1 = Creature("Quasit", [Action("Claw", 4, 3, Dice(1, 4)), Action("Sting", 4, 3, Dice(1, 4))], 7, 10, 3)
+            monster_2 = Creature("Orc", [Action("Greataxe", 5, 3, Dice(1, 12))], 15, 13, 1)
+            initiative_dice = Dice(1, 20)
+
+            monster_1.initiative = initiative_dice.roll() + monster_1.initiative_modifier
+            monster_2.initiative = initiative_dice.roll() + monster_2.initiative_modifier
+
+            initiative_order = [monster_1, monster_2]
+            initiative_order.sort(key=lambda x: x.initiative, reverse=True)
+
+            round = 1
+
+            while True:
+                for creature in initiative_order:
+                    if not creature.is_alive():
+                        creature.roll_death_saving_throw()
+                        continue
+
+                    creature.choose_target([monster_2], [monster_1])
+                    creature.attack()
+
+                    if not monster_2.is_alive() or not monster_1.is_alive():
+                        break
+
+                round += 1
+
+                if not monster_2.is_alive() or not monster_1.is_alive():
+                    break
+
+            current_simulation += 1
+            if not monster_2.is_alive():
+                goblin_results.encounters_won += 1
+            else:
+                orc_results.encounters_won += 1
+
+        print(f"\nResults:")
+        print(f"Goblin vs Orc")
+        print(f"Percentage of Encounters Won: {goblin_results.encounters_won / number_of_simulations * 100}%")

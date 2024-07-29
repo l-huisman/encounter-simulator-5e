@@ -1,12 +1,14 @@
 import random
 
+from models.Abilities import Ability, Abilities
 from models.action import Action
 from models.dice import Dice
 
 
 class Creature:
-    def __init__(self, name: str, actions: list[Action], hit_points: int, armour_class: int,
+    def __init__(self, name: str, abilities: Abilities, actions: list[Action], hit_points: int, armour_class: int,
                  initiative_modifier: int) -> None:
+        self.abilities = abilities
         self.name: str = name
         self.initiative: int = 0
         self.actions: list[Action] = actions
@@ -50,6 +52,11 @@ class Creature:
             self.death_fails += 1
         else:
             self.death_saves += 1
+
+    def roll_saving_throw(self, dc: int, ability: Ability) -> bool:
+        roll = Dice(1, 20).roll()
+        modifier = self.abilities.get_ability_modifier(ability)
+        return roll + modifier >= dc
 
     def take_damage(self, damage: int) -> None:
         self.hit_points -= damage
