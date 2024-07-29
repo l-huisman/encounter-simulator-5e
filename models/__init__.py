@@ -1,4 +1,2 @@
-from classes import *
-from races import *
-
-
+from .classes import *
+from .races import *

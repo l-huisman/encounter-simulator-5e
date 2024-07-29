@@ -1,4 +1,4 @@
-from base_class import BaseClass
+from .base_class import BaseClass
 
 
 class Cleric(BaseClass):

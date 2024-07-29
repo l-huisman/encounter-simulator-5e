@@ -1,4 +1,4 @@
-from race import Race
+from .race import Race
 
 
 class HalfOrc(Race):
