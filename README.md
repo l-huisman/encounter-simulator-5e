@@ -1,6 +1,6 @@
 # encounter-simulator-5e
 
-A simple encounter simulator for D&D 5e, where a set party of characters fights a set group of goblins.
+A simple encounter simulator for D&D 5e, where a set group of monsters fight another set group of monsters.
 
 ## Usage
 
@@ -12,11 +12,35 @@ python3 main.py
 
 Additionally, you can specify a few optional arguments:
 
-- `--enemy-count` to specify the number of enemies in the encounter.
 - `--simulation-count` to specify the number of simulations to run.
-- `--adventures-highest-damage` to specify that the adventuring party will only use their highest damage option.
-- `--enemies-highest-damage` to specify that the enemies will only use their highest damage option.
 
 ```bash
-python3 main.py --enemy-count 3 --simulation-count 1000 --adventures-highest-damage --enemies-highest-damage
+python3 main.py --simulation-count 1000
 ```
+
+## Example
+
+Here is an example of the simulator in action:
+
+```bash
+$ python3 main.py
+Simulation 1564 of 10000 Simulations
+{'party_1_wins': 32953, 'party_2_wins': 67047}
+```
+
+## Contributing
+
+If you would like to contribute, please open an issue or a pull request.
+
+## Roadmap
+
+- [ ] Add graphical interface for easier use (Website)
+
+- [ ] Add support for distance tracking (Virtual Tabletop)
+
+- [ ] Add support for spellcasting
+- [ ] Add support for condition effects
+- [ ] Add support for legendary actions
+- [ ] Add support for lair actions
+
+- [ ] Add support for homebrew monsters, spells, items, etc.
