@@ -1,40 +1,53 @@
 import argparse
 import sys
+from typing import List
+
+from models.dice import Dice
+from models.action import Action
+from models.monster import Monster
+from models.challenge_rating import ChallengeRating
 
 from simulator import Simulator
 
-# Create an argument parser
 parser = argparse.ArgumentParser(description="Simulate a D&D combat encounter.")
-
-# Add an argument for the number of enemies
-parser.add_argument("--enemy-count", type=int, default=4,
-                    help="The number of enemies in the encounter. Default is 4.")
-
-# Add an argument for the number of simulations
 parser.add_argument("--simulation-count", type=int, default=100000,
                     help="The number of simulations to run. Default is 100000.")
-
-# Add an argument for the highest damage adventurers
-parser.add_argument("--adventurers-highest-damage", action="store_true",
-                    help="If set, the adventuring party will only use their highest damage option. Default is False.")
-
-# Add an argument for the highest damage enemies
-parser.add_argument("--enemies-highest-damage", action="store_true",
-                    help="If set, the enemies will only use their highest damage option. Default is False.")
-
-# Parse the arguments
 args = parser.parse_args()
 
 # Check if the arguments are within an acceptable range
-if args.enemy_count < 1 or args.simulation_count < 1:
+if args.simulation_count < 1:
     print("Error: The number of enemies and simulations must be greater than 0.")
     sys.exit(1)
 
-# Create a simulator object
-simulator = Simulator(args.simulation_count, args.adventurers_highest_damage)
+goblin = Monster(name="Goblin", size="Small", race="Humanoid (Goblinoid)", sub_race="", alignment="Neutral Evil",
+                 strength=8, dexterity=14, constitution=10, intelligence=10, wisdom=8, charisma=8, hit_dice=Dice(2, 6),
+                 armour_class=15, speed=30, skills={}, senses={"darkvision": 60}, languages=["Common", "Goblin"],
+                 challenge_rating=ChallengeRating.CR_1_4, damage_vulnerabilities=[], damage_resistances=[],
+                 damage_immunities=[], condition_immunities=[], special_abilities=[], actions=[
+        Action(name="Scimitar", proficiency_modifier=2, ability_modifier=2, damage_dice=Dice(1, 6)),
+        Action(name="Shortbow", proficiency_modifier=2, ability_modifier=2, damage_dice=Dice(1, 6))],
+                 bonus_actions=[], legendary_actions=[], reactions=[])
 
-# Set the number of enemies
-enemy_count = args.enemy_count
+bugbear = Monster(name="Bugbear", size="Medium", race="Humanoid (Goblinoid)", sub_race="", alignment="Chaotic Evil",
+                  strength=16, dexterity=14, constitution=15, intelligence=8, wisdom=11, charisma=9,
+                  hit_dice=Dice(4, 8),
+                  armour_class=16, speed=30, skills={"Stealth": 6}, senses={"darkvision": 60},
+                  languages=["Common", "Goblin"],
+                  challenge_rating=ChallengeRating.CR_1, damage_vulnerabilities=[], damage_resistances=[],
+                  damage_immunities=[],
+                  condition_immunities=[], special_abilities=[], actions=[
+        Action(name="Morningstar", proficiency_modifier=3, ability_modifier=3, damage_dice=Dice(1, 8)),
+        Action(name="Javelin", proficiency_modifier=3, ability_modifier=3, damage_dice=Dice(1, 6))],
+                  bonus_actions=[], legendary_actions=[], reactions=[])
 
-# Run the simulator
-simulator.monster_vs_monster()
+party_1: List[Monster] = [
+    goblin, goblin, goblin, goblin
+]
+
+party_2: List[Monster] = [
+    bugbear
+]
+
+simulator = Simulator(args.simulation_count, party_1, party_2)
+
+simulator.run()

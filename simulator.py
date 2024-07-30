@@ -1,180 +1,61 @@
-from models.action import Action
-from models.creature import Creature
-from models.dice import Dice
-from results import SimulationResults
+from models.monster import Monster
 
 
 class Simulator:
-    def __init__(self, total_simulations: int, adventurers_highest_damage: bool):
-        self.round: int = 0
+    def __init__(self, total_simulations: int, party_1: list[Monster], party_2: list[Monster]) -> None:
+        self.current_round: int = 0
         self.simulation_count: int = 0
-        self.initiative_dice: Dice = Dice(1, 20)
         self.total_simulations: int = total_simulations
-        self.adventurers_highest_damage: float = adventurers_highest_damage
-        self.simulation_results: SimulationResults = SimulationResults()
-        self.party: list[Creature] = []
-        self.enemies: list[Creature] = []
+        self.party_1: list[Monster] = party_1
+        self.party_2: list[Monster] = party_2
+        self.simulation_results: dict[str, int] = {
+            "party_1_wins": 0,
+            "party_2_wins": 0,
+        }
 
-    def run(self, enemy_count):
-        # Run the simulation until the simulation count
-        while self.simulation_count < self.total_simulations:
-            # Create the list of enemies
-            self.enemies: list[Creature] = [
-                Creature("Goblin", [Action("Scimitar", 2, 2, Dice(1, 6)), Action("Longbow", 2, 2, Dice(1, 8))], 7, 15,
-                         2) for i in range(enemy_count)]
+    def reset(self):
+        self.current_round = 0
+        for monster in self.party_1:
+            monster.reset()
+        for monster in self.party_2:
+            monster.reset()
 
-            # Create an adventuring party
-            self.party: list[Creature] = [
-                Creature("Fighter", [Action("Longsword", 2, 3, Dice(1, 8)), Action("Shortbow", 2, 2, Dice(1, 6))], 13,
-                         18, 2),
-                Creature("Rogue", [Action("Shortsword", 2, 3, Dice(1, 6)), Action("Shortbow", 2, 3, Dice(1, 6))], 11,
-                         15, 3),
-                Creature("Wizard", [Action("Firebolt", 2, 3, Dice(1, 10)), Action("Chill Touch", 2, 3, Dice(1, 8))], 9,
-                         12, 1),
-                Creature("Cleric", [Action("Mace", 2, 1, Dice(1, 6)), Action("Longbow", 2, 0, Dice(1, 8))], 10, 16, 0),
-            ]
-
-            if self.simulation_count % 10000 == 0:
-                print(f"Simulation {self.simulation_count} of {self.total_simulations}", end="\r", flush=True)
-
-            # Set initiative order
-            initiative_order = self.set_initiative_order()
-
-            # Set the round to 0
-            self.round = 1
-
-            # Simulate the combat round
-            self.simulate_combat_rounds(initiative_order)
-
-        # Print the results
-        self.print_results()
-
-    def simulate_combat_rounds(self, initiative_order: list[Creature]) -> None:
-        # Encounter loop
-        while True:
-            # Iterate through the initiative order
-            for creature in initiative_order:
-                # If the creature is dead, skip their turn
-                if not creature.is_alive():
-                    creature.roll_death_saving_throw()
-                    continue
-
-                # If the creature is an enemy, attack a random adventurer
-                if not creature.is_unconscious():
-                    creature.choose_target(self.enemies, self.party)
-                    creature.attack()
-
-                # Check if all enemies or all adventurers are dead
-                if self.all_enemies_dead() or self.all_adventurers_dead():
-                    break
-
-            # Increment the round
-            self.round += 1
-
-            # If all the enemies are dead, end the combat
-            if not any(enemy.is_alive() for enemy in self.enemies) or not any(
-                    adventurer.is_alive() for adventurer in self.party):
-                self.save_simulation_results()
-                break
-
-    def all_enemies_dead(self):
-        return not any(enemy.is_alive() for enemy in self.enemies)
-
-    def all_adventurers_dead(self):
-        return not any(adventurer.is_alive() for adventurer in self.party)
-
-    def set_initiative_order(self) -> list[Creature]:
-        # Roll initiative for the party
-        for adventurer in self.party:
-            adventurer.initiative = self.initiative_dice.roll() + adventurer.initiative_modifier
-
-        # Roll initiative for the enemies
-        for enemy in self.enemies:
-            enemy.initiative = self.initiative_dice.roll() + enemy.initiative_modifier
-
-        # Sort the party and enemies by initiative
-        initiative_order: list[Creature] = self.party + self.enemies
-        initiative_order.sort(key=lambda x: x.initiative, reverse=True)
-
-        # Return the initiative order
+    def set_initiative_order(self):
+        initiative_order = self.party_1 + self.party_2
+        for monster in initiative_order:
+            monster.initiative = monster.roll_initiative()
+        initiative_order.sort(key=lambda monster: monster.initiative, reverse=True)
         return initiative_order
 
-    def save_simulation_results(self):
-        self.simulation_count += 1
-        self.simulation_results.total_simulations += 1
-        if self.all_enemies_dead():
-            self.simulation_results.remaining_hit_points_enemies.append(
-                sum(enemy.hit_points for enemy in self.enemies if enemy.is_alive()))
-            self.simulation_results.surviving_enemies.append(len([enemy for enemy in self.enemies if enemy.is_alive()]))
-            self.simulation_results.encounters_lost += 1
-        else:
-            self.simulation_results.remaining_hit_points_adventurers.append(
-                sum(adventurer.hit_points for adventurer in self.party if adventurer.is_alive()))
-            self.simulation_results.surviving_adventurers.append(
-                len([adventurer for adventurer in self.party if adventurer.is_alive()]))
-            self.simulation_results.encounters_won += 1
+    def simulate_combat_round(self):
+        initiative_order = self.set_initiative_order()
+        while True:
+            for monster in initiative_order:
+                if not monster.is_alive():
+                    continue
+                monster.choose_target(self.party_1, self.party_2)
+                monster.attack()
+                if self.all_dead(self.party_1) or self.all_dead(self.party_2):
+                    break
+            self.current_round += 1
+            if self.all_dead(self.party_1) or self.all_dead(self.party_2):
+                break
 
-    def print_results(self):
-        # Iterate through the results and print the percentage won
-        # The average amount of party members that survived the encounter
-        print(f"\nResults:")
-        print(f"Percentage of Encounters Won: "
-              f"{self.simulation_results.encounters_won / self.simulation_results.total_simulations * 100}%")
-        print(f"Percentage of Encounters Lost: "
-              f"{self.simulation_results.encounters_lost / self.simulation_results.total_simulations * 100}%")
-        print(f"Average Number of Party Members Surviving: "
-              f"{sum(self.simulation_results.surviving_adventurers) / self.simulation_results.total_simulations} of {len(self.party)}")
-        print(f"Average Number of Enemies Surviving: "
-              f"{sum(self.simulation_results.surviving_enemies) / self.simulation_results.total_simulations}")
-        print(f"Average Remaining Hit Points Enemies: "
-              f"{sum(self.simulation_results.remaining_hit_points_enemies) / self.simulation_results.total_simulations}")
-        print(f"Average Remaining Hit Points Adventurers: "
-              f"{sum(self.simulation_results.remaining_hit_points_adventurers) / self.simulation_results.total_simulations} ")
+    def simulate_encounter(self):
+        while self.simulation_count < self.total_simulations:
+            print(f"Simulation {self.simulation_count + 1} of {self.total_simulations} Simulations", end="\r")
+            self.simulate_combat_round()
+            if self.all_dead(self.party_1):
+                self.simulation_results["party_2_wins"] += 1
+            elif self.all_dead(self.party_2):
+                self.simulation_results["party_1_wins"] += 1
+            self.reset()
+            self.simulation_count += 1
 
     @staticmethod
-    def monster_vs_monster():
-        current_simulation = 0
-        number_of_simulations = 100000
+    def all_dead(party):
+        return not any(monster.is_alive() for monster in party)
 
-        goblin_results = SimulationResults()
-        orc_results = SimulationResults()
-
-        while current_simulation < number_of_simulations:
-            monster_1 = Creature("Quasit", [Action("Claw", 4, 3, Dice(1, 4)), Action("Sting", 4, 3, Dice(1, 4))], 7, 10, 3)
-            monster_2 = Creature("Orc", [Action("Greataxe", 5, 3, Dice(1, 12))], 15, 13, 1)
-            initiative_dice = Dice(1, 20)
-
-            monster_1.initiative = initiative_dice.roll() + monster_1.initiative_modifier
-            monster_2.initiative = initiative_dice.roll() + monster_2.initiative_modifier
-
-            initiative_order = [monster_1, monster_2]
-            initiative_order.sort(key=lambda x: x.initiative, reverse=True)
-
-            round = 1
-
-            while True:
-                for creature in initiative_order:
-                    if not creature.is_alive():
-                        creature.roll_death_saving_throw()
-                        continue
-
-                    creature.choose_target([monster_2], [monster_1])
-                    creature.attack()
-
-                    if not monster_2.is_alive() or not monster_1.is_alive():
-                        break
-
-                round += 1
-
-                if not monster_2.is_alive() or not monster_1.is_alive():
-                    break
-
-            current_simulation += 1
-            if not monster_2.is_alive():
-                goblin_results.encounters_won += 1
-            else:
-                orc_results.encounters_won += 1
-
-        print(f"\nResults:")
-        print(f"Goblin vs Orc")
-        print(f"Percentage of Encounters Won: {goblin_results.encounters_won / number_of_simulations * 100}%")
+    def run(self):
+        self.simulate_encounter()
+        print(self.simulation_results)
