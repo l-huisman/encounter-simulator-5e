@@ -35,12 +35,26 @@ If you would like to contribute, please open an issue or a pull request.
 ## Roadmap
 
 - [ ] Add graphical interface for easier use (Website)
-
 - [ ] Add support for distance tracking (Virtual Tabletop)
-
 - [ ] Add support for spellcasting
 - [ ] Add support for condition effects
 - [ ] Add support for legendary actions
 - [ ] Add support for lair actions
-
+- [ ] Add ability to add player characters
+  - [ ] Artificer
+  - [ ] Barbarian
+  - [ ] Bard
+  - [ ] Blood Hunter
+  - [ ] Cleric
+  - [ ] Druid
+  - [ ] Fighter
+  - [ ] Monk
+  - [ ] Paladin
+  - [ ] Ranger
+  - [ ] Rogue
+  - [ ] Sorcerer
+  - [ ] Warlock
+  - [ ] Wizard
+  - [ ] Custom
+- [ ] Add ability to save and load encounters
 - [ ] Add support for homebrew monsters, spells, items, etc.
