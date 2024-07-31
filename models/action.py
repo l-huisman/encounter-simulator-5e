@@ -26,6 +26,12 @@ class Action:
     def roll_to_hit(self) -> int:
         return self.hit_dice.roll() + self.hit_modifier if self.hit_dice else 0
 
+    def roll_with_advantage_to_hit(self) -> int:
+        return max(self.roll_to_hit(), self.roll_to_hit())
+
+    def roll_with_disadvantage_to_hit(self) -> int:
+        return min(self.roll_to_hit(), self.roll_to_hit())
+
     def roll_damage(self) -> int:
         return self.damage_dice.roll() + self.damage_modifier if self.damage_dice else 0
 

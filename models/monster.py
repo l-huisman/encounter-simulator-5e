@@ -3,6 +3,7 @@ from models.abilities import Ability
 from models.dice import Dice
 from models.challenge_rating import ChallengeRating
 from models.action import Action
+from models.condition import Condition
 
 
 def calculate_ability_modifier(ability: int) -> int:
@@ -137,12 +138,21 @@ class Monster:
         return base_hp + additional_hp
 
     def attack(self) -> None:
-        if self.target and not self.target == self:
-            for action in self.actions:
-                if action.roll_to_hit() >= self.target.armour_class:
-                    damage = action.roll_damage()
-                    self.target.take_damage(damage)
-                    action.apply_effects(self.target)
+        if not self.target or self.target == self or Condition.CHARMED or Condition.INCAPACITATED in self.target.conditions:
+            return
+
+        action = random.choice(self.actions)
+
+        if Condition.BLINDED or Condition.FRIGHTENED or Condition.POISONED or Condition.PRONE or Condition.RESTRAINED in self.conditions:
+            roll = action.roll_with_disadvantage_to_hit()
+        elif Condition.INVISIBLE in self.conditions:
+            roll = action.roll_with_advantage_to_hit()
+        else:
+            roll = action.roll_to_hit()
+        if roll >= self.target.armour_class:
+            damage = action.roll_damage()
+            self.target.take_damage(damage)
+            action.apply_effects(self.target)
 
     def roll_saving_throw(self, dc: int, ability: Ability) -> bool:
         roll = Dice(1, 20).roll()
@@ -176,8 +186,8 @@ class Monster:
             self.hit_points = 0
             self.unconscious = True
 
-    def apply_condition(self, status_effect: str, duration: int, repeat_save: bool, disadvantage_on_save: bool):
-        self.conditions.append((status_effect, duration, repeat_save, disadvantage_on_save))
+    def apply_condition(self, condition: Condition, duration: int, repeat_save: bool, disadvantage_on_save: bool):
+        self.conditions.append((condition, duration, repeat_save, disadvantage_on_save))
 
     def roll_initiative(self) -> int:
         return Dice(1, 20).roll() + self.dexterity_modifier
