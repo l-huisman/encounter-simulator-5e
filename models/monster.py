@@ -1,8 +1,9 @@
 import random
-from models.abilities import Ability
-from models.dice import Dice
+
 from constants.challenge_rating import ChallengeRating
 from constants.condition import Condition
+from models.abilities import Ability
+from models.dice import Dice
 
 
 def calculate_ability_modifier(ability: int) -> int:
