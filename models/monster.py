@@ -156,7 +156,7 @@ class Monster:
             self.target.take_damage(damage)
             action.apply_effects(self.target)
 
-    def roll_saving_throw(self, dc: int, ability: Ability) -> bool:
+    def roll_saving_throw(self, difficulty_class: int, ability: Ability) -> bool:
         roll = Dice(1, 20).roll()
         match ability:
             case Ability.STRENGTH:
@@ -173,7 +173,7 @@ class Monster:
                 modifier = self.charisma
             case _:
                 raise ValueError(f"Invalid ability: {ability}")
-        return roll + modifier >= dc
+        return roll + modifier >= difficulty_class
 
     def take_damage(self, damage: int, damage_type: str = None):
         if damage_type in self.damage_vulnerabilities:
