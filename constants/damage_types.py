@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class DamageTypes(Enum):
+class DamageType(Enum):
     Acid = 1
     Bludgeoning = 2
     Cold = 3
