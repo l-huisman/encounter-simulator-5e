@@ -138,17 +138,19 @@ class Monster:
         return base_hp + additional_hp
 
     def attack(self) -> None:
-        if not self.target or self.target == self or Condition.CHARMED or Condition.INCAPACITATED in self.target.conditions:
+        if not self.target or self.target == self:
             return
 
         action = random.choice(self.actions)
 
-        if Condition.BLINDED or Condition.FRIGHTENED or Condition.POISONED or Condition.PRONE or Condition.RESTRAINED in self.conditions:
-            roll = action.roll_with_disadvantage_to_hit()
-        elif Condition.INVISIBLE in self.conditions:
-            roll = action.roll_with_advantage_to_hit()
-        else:
-            roll = action.roll_to_hit()
+        # if Condition.BLINDED or Condition.FRIGHTENED or Condition.POISONED or Condition.PRONE or Condition.RESTRAINED in self.conditions:
+        #     roll = action.roll_with_disadvantage_to_hit()
+        # elif Condition.INVISIBLE in self.conditions:
+        #     roll = action.roll_with_advantage_to_hit()
+        # else:
+        #     roll = action.roll_to_hit()
+
+        roll = action.roll_to_hit()
         if roll >= self.target.armour_class:
             damage = action.roll_damage()
             self.target.take_damage(damage)
