@@ -1,1 +1,1 @@
-from .damage_types import DamageType
+from .damage_type import DamageType
