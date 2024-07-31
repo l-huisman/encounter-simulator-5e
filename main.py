@@ -2,11 +2,10 @@ import argparse
 import sys
 from typing import List
 
-from models.dice import Dice
-from models.action import Action
-from models.monster import Monster
 from constants.challenge_rating import ChallengeRating
-
+from models.action import Action
+from models.dice import Dice
+from models.monster import Monster
 from simulator import Simulator
 
 parser = argparse.ArgumentParser(description="Simulate a D&D combat encounter.")

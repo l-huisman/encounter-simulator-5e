@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class WeaponProperties(Enum):
+class WeaponProperty(Enum):
     AMMUNITION = 1
     FINESSE = 2
     HEAVY = 3

@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ItemRarities(Enum):
+class ItemRarity(Enum):
     COMMON = 1
     UNCOMMON = 2
     RARE = 3
