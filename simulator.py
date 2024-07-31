@@ -52,6 +52,11 @@ class Simulator:
             self.reset()
             self.simulation_count += 1
 
+    def calculate_perecentages(self):
+        party_1_percentage = self.simulation_results["party_1_wins"] / self.simulation_count * 100
+        party_2_percentage = self.simulation_results["party_2_wins"] / self.simulation_count * 100
+        return party_1_percentage, party_2_percentage
+
     @staticmethod
     def all_dead(party):
         return not any(monster.is_alive() for monster in party)
@@ -59,3 +64,5 @@ class Simulator:
     def run(self):
         self.simulate_encounter()
         print(self.simulation_results)
+        perc_1 , perc_2 = self.calculate_perecentages()
+        print(f"{format(perc_1, ".2f")}%, {format(perc_2, ".2f")}%")
