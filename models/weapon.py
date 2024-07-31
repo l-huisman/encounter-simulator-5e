@@ -6,8 +6,8 @@ from models.dice import Dice
 
 
 class Weapon:
-    def __init__(self, name, type: WeaponType, dice: Dice, damage_type: DamageType, 
-                 rarity: ItemRarity, properties: list[WeaponProperty], range: tuple[int] | int, weight: float) -> None:
+    def __init__(self, name, type: WeaponType, dice: Dice, damage_type: DamageType, rarity: ItemRarity, 
+                 properties: list[WeaponProperty], range: tuple[int] | int, weight: float, is_magic: bool = False) -> None:
         self.name = name
         self.type = type
         self.dice = dice
@@ -16,6 +16,7 @@ class Weapon:
         self.properties = properties
         self.range = range
         self.weight = weight
+        self.is_magic = is_magic
 
     def use(self):
         return self.dice.roll()
