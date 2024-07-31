@@ -1,7 +1,6 @@
-import enum
+from enum import Enum
 
-
-class Alignment(enum.Enum):
+class Alignment(Enum):
     LAWFUL_GOOD = "Lawful Good"
     NEUTRAL_GOOD = "Neutral Good"
     CHAOTIC_GOOD = "Chaotic Good"

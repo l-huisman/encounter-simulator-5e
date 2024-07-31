@@ -5,7 +5,7 @@ from typing import List
 from models.dice import Dice
 from models.action import Action
 from models.monster import Monster
-from models.challenge_rating import ChallengeRating
+from constants.challenge_rating import ChallengeRating
 
 from simulator import Simulator
 
