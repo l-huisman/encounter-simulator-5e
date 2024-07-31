@@ -143,14 +143,13 @@ class Monster:
 
         action = random.choice(self.actions)
 
-        # if Condition.BLINDED or Condition.FRIGHTENED or Condition.POISONED or Condition.PRONE or Condition.RESTRAINED in self.conditions:
-        #     roll = action.roll_with_disadvantage_to_hit()
-        # elif Condition.INVISIBLE in self.conditions:
-        #     roll = action.roll_with_advantage_to_hit()
-        # else:
-        #     roll = action.roll_to_hit()
-
-        roll = action.roll_to_hit()
+        if any(condition in [Condition.BLINDED, Condition.FRIGHTENED, Condition.POISONED, Condition.PRONE,
+                             Condition.RESTRAINED] for condition in self.conditions):
+            roll = action.roll_with_disadvantage_to_hit()
+        elif any(condition in [Condition.INVISIBLE] for condition in self.conditions):
+            roll = action.roll_with_advantage_to_hit()
+        else:
+            roll = action.roll_to_hit()
         if roll >= self.target.armour_class:
             damage = action.roll_damage()
             self.target.take_damage(damage)
