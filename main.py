@@ -35,7 +35,7 @@ bugbear = Monster(name="Bugbear", size="Medium", race="Humanoid (Goblinoid)", su
                   challenge_rating=ChallengeRating.CR_1, damage_vulnerabilities=[], damage_resistances=[],
                   damage_immunities=[],
                   condition_immunities=[], special_abilities=[], actions=[
-        Action(name="Morningstar", proficiency_modifier=3, ability_modifier=3, damage_dice=Dice(1, Dice.d8)),
+        Action(name="Morningstar", proficiency_modifier=3, ability_modifier=3, damage_dice=Dice(1, 8)),
         Action(name="Javelin", proficiency_modifier=3, ability_modifier=3, damage_dice=Dice(1, 6))],
                   bonus_actions=[], legendary_actions=[], reactions=[])
 
