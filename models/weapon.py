@@ -7,7 +7,7 @@ from models.dice import Dice
 
 class Weapon:
     def __init__(self, name, type: WeaponType, dice: Dice, damage_type: DamageType, 
-                 rarity: ItemRarity, properties: WeaponProperty, range: tuple[int] | int, weight: float) -> None:
+                 rarity: ItemRarity, properties: list[WeaponProperty], range: tuple[int] | int, weight: float) -> None:
         self.name = name
         self.type = type
         self.dice = dice
